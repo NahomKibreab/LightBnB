@@ -42,7 +42,6 @@ exports.getUserWithEmail = getUserWithEmail;
  * @return {Promise<{}>} A promise to the user.
  */
 const getUserWithId = function (id) {
-  // return Promise.resolve(users[id]);
   return pool
     .query(`SELECT * FROM users WHERE id = $1`, [id])
     .then((result) => result.rows[0])
@@ -56,10 +55,6 @@ exports.getUserWithId = getUserWithId;
  * @return {Promise<{}>} A promise to the user.
  */
 const addUser = function (user) {
-  // const userId = Object.keys(users).length + 1;
-  // user.id = userId;
-  // users[userId] = user;
-  // return Promise.resolve(user);
   return pool
     .query(
       `
@@ -82,7 +77,19 @@ exports.addUser = addUser;
  * @return {Promise<[{}]>} A promise to the reservations.
  */
 const getAllReservations = function (guest_id, limit = 10) {
-  return getAllProperties(null, 2);
+  return pool
+    .query(
+      `
+    SELECT reservations.*,properties.* FROM reservations
+    JOIN properties ON reservations.property_id = properties.id
+    WHERE guest_id = $1 LIMIT $2;`,
+      [guest_id, limit]
+    )
+    .then((result) => {
+      console.log(result.rows);
+      return result.rows;
+    })
+    .catch((err) => err.message);
 };
 exports.getAllReservations = getAllReservations;
 
